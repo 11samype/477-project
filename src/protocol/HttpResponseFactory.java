@@ -55,20 +55,8 @@ public class HttpResponseFactory {
 		response.put(Protocol.PROVIDER, Protocol.AUTHOR);
 	}
 	
-	/**
-	 * Creates a {@link HttpResponse} object for sending the supplied file with supplied connection
-	 * parameter.
-	 * 
-	 * @param file The {@link File} to be sent.
-	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
-	 * @return A {@link HttpResponse} object represent 200 status.
-	 */
-	public static HttpResponse create200OK(File file, String connection) {
-		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.OK_CODE, 
-				Protocol.OK_TEXT, new HashMap<String, String>(), file);
-		
-		// Lets fill up header fields with more information
-		fillGeneralHeader(response, connection);
+	private static void appendFile(HttpResponse response, File file) {
+		response.addFile(file);
 		
 		// Lets add last modified date for the file
 		long timeSinceEpoch = file.lastModified();
@@ -88,6 +76,25 @@ public class HttpResponseFactory {
 		if(mime != null) { 
 			response.put(Protocol.CONTENT_TYPE, mime);
 		}
+	}
+	
+	/**
+	 * Creates a {@link HttpResponse} object for sending the supplied file with supplied connection
+	 * parameter.
+	 * 
+	 * @param file The {@link File} to be sent.
+	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
+	 * @return A {@link HttpResponse} object represent 200 status.
+	 */
+	public static HttpResponse create200OK(File file, String connection) {
+		HttpResponse response = new HttpResponse200OK();
+		
+		// Lets fill up header fields with more information
+		fillGeneralHeader(response, connection);
+		
+		if (file != null) {
+			appendFile(response, file);
+		}
 		
 		return response;
 	}
@@ -99,8 +106,7 @@ public class HttpResponseFactory {
 	 * @return A {@link HttpResponse} object represent 400 status.
 	 */
 	public static HttpResponse create400BadRequest(String connection) {
-		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.BAD_REQUEST_CODE, 
-				Protocol.BAD_REQUEST_TEXT, new HashMap<String, String>(), null);
+		HttpResponse response = new HttpResponse400BadRequest();
 		
 		// Lets fill up header fields with more information
 		fillGeneralHeader(response, connection);
@@ -115,8 +121,7 @@ public class HttpResponseFactory {
 	 * @return A {@link HttpResponse} object represent 404 status.
 	 */
 	public static HttpResponse create404NotFound(String connection) {
-		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.NOT_FOUND_CODE, 
-				Protocol.NOT_FOUND_TEXT, new HashMap<String, String>(), null);
+		HttpResponse response = new HttpResponse404NotFound();
 		
 		// Lets fill up the header fields with more information
 		fillGeneralHeader(response, connection);
@@ -131,7 +136,11 @@ public class HttpResponseFactory {
 	 * @return A {@link HttpResponse} object represent 505 status.
 	 */
 	public static HttpResponse create505NotSupported(String connection) {
-		// TODO fill in this method
+		HttpResponse response = new HttpResponse505NotSupported();
+		
+		// Lets fill up the header fields with more information
+		fillGeneralHeader(response, connection);
+		
 		return null;
 	}
 	
@@ -142,7 +151,10 @@ public class HttpResponseFactory {
 	 * @return A {@link HttpResponse} object represent 304 status.
 	 */
 	public static HttpResponse create304NotModified(String connection) {
-		// TODO fill in this method
+		HttpResponse response = new HttpResponse304NotModified();
+		
+		fillGeneralHeader(response, connection);
+		
 		return null;
 	}
 }

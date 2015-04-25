@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,11 +52,15 @@ public class HttpResponse {
 	 * @param header The header field map.
 	 * @param file The file to be sent.
 	 */
-	public HttpResponse(String version, int status, String phrase, Map<String, String> header, File file) {
-		this.version = version;
+	public HttpResponse(int status, String phrase) {
+		this.version = Protocol.VERSION;
 		this.status = status;
 		this.phrase = phrase;
-		this.header = header;
+		this.header = new HashMap<String, String>();
+		this.file = null;
+	}
+	
+	public void addFile(File file) {
 		this.file = file;
 	}
 

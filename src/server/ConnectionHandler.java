@@ -103,7 +103,10 @@ public class ConnectionHandler implements Runnable {
 			if(status == Protocol.BAD_REQUEST_CODE) {
 				response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
 			}
-			// TODO: Handle version not supported code as well
+			// DONE: Handle version not supported code as well
+			if(status == Protocol.NOT_SUPPORTED_CODE) {
+				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
+			}
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -138,53 +141,26 @@ public class ConnectionHandler implements Runnable {
 			if(!request.getVersion().equalsIgnoreCase(Protocol.VERSION)) {
 				// Here you checked that the "Protocol.VERSION" string is not equal to the  
 				// "request.version" string ignoring the case of the letters in both strings
-				// TODO: Fill in the rest of the code here
+				// DONE: Fill in the rest of the code here
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
 			else if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
-//				Map<String, String> header = request.getHeader();
-//				String date = header.get("if-modified-since");
-//				String hostName = header.get("host");
-//				
-				// Handling GET request here
-				// Get relative URI path from request
-				String uri = request.getUri();
-				// Get root directory path from server
-				String rootDirectory = server.getRootDirectory();
-				// Combine them together to form absolute file path
-				File file = new File(rootDirectory + uri);
-				// Check if the file exists
-				if(file.exists()) {
-					if(file.isDirectory()) {
-						// Look for default index.html file in a directory
-						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-						file = new File(location);
-						if(file.exists()) {
-							// Lets create 200 OK response
-							response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-						}
-						else {
-							// File does not exist so lets create 404 file not found code
-							response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-						}
-					}
-					else { // Its a file
-						// Lets create 200 OK response
-						response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-					}
-				}
-				else {
-					// File does not exist so lets create 404 file not found code
-					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-				}
+				response = (new GETRequestHandler()).interpretRequest(request, server);
+			} else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {
+				response = (new POSTRequestHandler()).interpretRequest(request, server);
+			} else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
+				response = (new PUTRequestHandler()).interpretRequest(request, server);
+			} else if(request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
+				response = (new DELETERequestHandler()).interpretRequest(request, server);
 			}
+
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
 		
 
-		// TODO: So far response could be null for protocol version mismatch.
+		// DONE: So far response could be null for protocol version mismatch.
 		// So this is a temporary patch for that problem and should be removed
 		// after a response object is created for protocol version mismatch.
 		if(response == null) {
