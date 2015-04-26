@@ -53,11 +53,24 @@ public class POSTRequestHandler implements IRequestHandler {
 	 */
 	@Override
 	public HttpResponse interpretRequest(HttpRequest request, Server server) {
+		
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(request.getBody());
+		String body = buffer.toString();
+		
+		String[] segments = body.split("\""); // index 3 should house name
+		
+		String fileText = body.substring(body.indexOf("text/plain") + 14, body.lastIndexOf("------WebKitFormBoundary"));
+		
+//		System.out.println(fileText);
+		
 		String uri = request.getUri();
 		String rootDirectory = server.getRootDirectory();
-		File file = new File(rootDirectory + uri);
+		File file;
 		
-		String location = rootDirectory + uri;
+//		String location = rootDirectory + uri;
+		String location = rootDirectory + "/" + segments[3];
+//		System.out.println(location);
 		file = new File(location);
 		
 		FileWriter fw;
@@ -65,7 +78,8 @@ public class POSTRequestHandler implements IRequestHandler {
 //			System.out.println(file.getAbsolutePath());
 			fw = new FileWriter(file.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write(request.getBody());
+//			bw.write(request.getBody());
+			bw.write(fileText);
 			bw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
