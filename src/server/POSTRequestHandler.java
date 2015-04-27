@@ -60,7 +60,7 @@ public class POSTRequestHandler implements IRequestHandler {
 		
 		String[] segments = body.split("\""); // index 3 should house name
 		
-		String fileText = body.substring(body.indexOf("text/plain") + 14, body.lastIndexOf("------WebKitFormBoundary"));
+		String fileText = body.substring(body.indexOf("text/plain") + 14, body.lastIndexOf("------WebKitFormBoundary") - 2);
 		
 //		System.out.println(fileText);
 		
