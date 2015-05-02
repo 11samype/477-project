@@ -1,6 +1,8 @@
+package server;
+
 /*
- * IRequestHandler.java
- * Apr 25, 2015
+ * IGETRequestHandler.java
+ * May 2, 2015
  *
  * Simple Web Server (SWS) for EE407/507 and CS455/555
  * 
@@ -25,18 +27,11 @@
  * NY 13699-5722
  * http://clarkson.edu/~rupakhcr
  */
- 
-package server;
-
-import protocol.HttpRequest;
-import protocol.HttpResponse;
 
 /**
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public interface IRequestHandler {
-	
-	public HttpResponse doRequest(HttpRequest request, String rootDirectory);
-	
+public interface IGETRequestHandler extends IRequestHandler {
+
 }

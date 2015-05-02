@@ -23,8 +23,10 @@ package protocol;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,6 +43,7 @@ public class HttpResponse {
 	private String phrase;
 	private Map<String, String> header;
 	private File file;
+	private String data;
 
 	
 	/**
@@ -58,10 +61,15 @@ public class HttpResponse {
 		this.phrase = phrase;
 		this.header = new HashMap<String, String>();
 		this.file = null;
+		this.data = null;
 	}
 	
 	public void addFile(File file) {
 		this.file = file;
+	}
+	
+	public void addData(String data) {
+		this.data = data;
 	}
 
 	/**
@@ -144,9 +152,21 @@ public class HttpResponse {
 
 		// Write a blank line
 		out.write(Protocol.CRLF.getBytes());
-
-		// We are reading a file
-		if(this.getStatus() == Protocol.OK_CODE && file != null) {
+		
+		if(this.getStatus() == Protocol.OK_CODE && data != null) {
+			// Process text documents
+			InputStream dataInStream = new ByteArrayInputStream(data.getBytes());
+			BufferedInputStream inStream = new BufferedInputStream(dataInStream, Protocol.CHUNK_LENGTH);
+			
+			byte[] buffer = new byte[Protocol.CHUNK_LENGTH];
+			int bytesRead = 0;
+			// While there is some bytes to read from file, read each chunk and send to the socket out stream
+			while((bytesRead = inStream.read(buffer)) != -1) {
+				out.write(buffer, 0, bytesRead);
+			}
+			// Close the file input stream, we are done reading
+			inStream.close();
+		} else if(this.getStatus() == Protocol.OK_CODE && file != null) { // We are reading a file
 			// Process text documents
 			FileInputStream fileInStream = new FileInputStream(file);
 			BufferedInputStream inStream = new BufferedInputStream(fileInStream, Protocol.CHUNK_LENGTH);
@@ -185,7 +205,11 @@ public class HttpResponse {
 		}
 		
 		buffer.append(Protocol.LF);
-		if(file != null) {
+		
+		if(data != null) {
+			buffer.append("Data: ");
+			buffer.append(this.data);
+		} else if(file != null) {
 			buffer.append("Data: ");
 			buffer.append(this.file.getAbsolutePath());
 		}

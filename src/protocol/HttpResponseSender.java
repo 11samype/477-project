@@ -1,6 +1,6 @@
 /*
- * PUTRequestHandler.java
- * Apr 25, 2015
+ * HttpResponseSender.java
+ * May 2, 2015
  *
  * Simple Web Server (SWS) for EE407/507 and CS455/555
  * 
@@ -26,50 +26,30 @@
  * http://clarkson.edu/~rupakhcr
  */
  
-package server;
+package protocol;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import protocol.HttpRequest;
-import protocol.HttpResponse;
-import protocol.HttpResponseFactory;
-import protocol.Protocol;
+import java.io.OutputStream;
 
 /**
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class PUTRequestHandler implements IRequestHandler {
-
-	/* (non-Javadoc)
-	 * @see server.IRequestHandler#interpretRequest(protocol.HttpRequest, server.Server)
-	 */
-	@Override
-	public HttpResponse interpretRequest(HttpRequest request, Server server) {
+public class HttpResponseSender {
+	
+	public HttpResponseSender() {
 		
-		String uri = request.getUri();
-		String rootDirectory = server.getRootDirectory();
-		File file = new File(rootDirectory + uri);
+	}
+	
+	public static void sendResponse(HttpResponse response, String data, OutputStream outStream) {
 		
-		String location = rootDirectory + uri;
-		file = new File(location);
-		
-		FileWriter fw;
+		response.addData(data);
 		try {
-//			System.out.println(file.getAbsolutePath());
-			fw = new FileWriter(file.getAbsoluteFile(), true);
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write(request.getBody());
-			bw.close();
-		} catch (IOException e) {
+			response.write(outStream);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return HttpResponseFactory.create200OK(null, Protocol.CLOSE);
 	}
 	
 }

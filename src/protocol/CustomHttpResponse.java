@@ -1,6 +1,6 @@
 /*
- * IRequestHandler.java
- * Apr 25, 2015
+ * CustomHttpResponse.java
+ * May 2, 2015
  *
  * Simple Web Server (SWS) for EE407/507 and CS455/555
  * 
@@ -26,17 +26,16 @@
  * http://clarkson.edu/~rupakhcr
  */
  
-package server;
-
-import protocol.HttpRequest;
-import protocol.HttpResponse;
+package protocol;
 
 /**
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public interface IRequestHandler {
+public class CustomHttpResponse extends HttpResponse {
 	
-	public HttpResponse doRequest(HttpRequest request, String rootDirectory);
+	public CustomHttpResponse(int code, String text) {
+		super(code, text);
+	}
 	
 }

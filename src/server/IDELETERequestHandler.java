@@ -1,6 +1,6 @@
 /*
- * DELETERequestHandler.java
- * Apr 25, 2015
+ * IDELETERequestHandler.java
+ * May 2, 2015
  *
  * Simple Web Server (SWS) for EE407/507 and CS455/555
  * 
@@ -28,42 +28,10 @@
  
 package server;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-
-import protocol.HttpRequest;
-import protocol.HttpResponse;
-import protocol.HttpResponseFactory;
-import protocol.Protocol;
-
 /**
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class DELETERequestHandler implements IRequestHandler {
-
-	/* (non-Javadoc)
-	 * @see server.IRequestHandler#interpretRequest(protocol.HttpRequest, server.Server)
-	 */
-	@Override
-	public HttpResponse interpretRequest(HttpRequest request, Server server) {
-		String uri = request.getUri();
-		String rootDirectory = server.getRootDirectory();
-		File file = new File(rootDirectory + uri);
-		
-		String location = rootDirectory + uri;
-		file = new File(location);
-		
-		if (file.exists() && !file.isDirectory()) {
-			file.delete();
-		} else {
-			return HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-		}
-		
-		return HttpResponseFactory.create200OK(null, Protocol.CLOSE);
-	}
+public interface IDELETERequestHandler extends IRequestHandler {
 
 }

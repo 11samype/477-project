@@ -22,6 +22,7 @@
 package server;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -43,10 +44,18 @@ import protocol.ProtocolException;
 public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
+	private PluginHandler pluginHandler;
 	
 	public ConnectionHandler(Server server, Socket socket) {
 		this.server = server;
 		this.socket = socket;
+		try {
+			pluginHandler = new PluginHandler();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	/**
@@ -144,14 +153,8 @@ public class ConnectionHandler implements Runnable {
 				// DONE: Fill in the rest of the code here
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
-				response = (new GETRequestHandler()).interpretRequest(request, server);
-			} else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {
-				response = (new POSTRequestHandler()).interpretRequest(request, server);
-			} else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
-				response = (new PUTRequestHandler()).interpretRequest(request, server);
-			} else if(request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
-				response = (new DELETERequestHandler()).interpretRequest(request, server);
+			else {
+				pluginHandler.handle(request, outStream, server.getRootDirectory());
 			}
 
 		}
