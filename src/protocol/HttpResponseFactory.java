@@ -26,7 +26,6 @@ import java.net.FileNameMap;
 import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 
 /**
  * This is a factory to produce various kind of HTTP responses.
@@ -152,6 +151,20 @@ public class HttpResponseFactory {
 	 */
 	public static HttpResponse create304NotModified(String connection) {
 		HttpResponse response = new HttpResponse304NotModified();
+		
+		fillGeneralHeader(response, connection);
+		
+		return null;
+	}
+	
+	/**
+	 * Creates a {@link HttpResponse} object for sending file not modified response.
+	 * 
+	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
+	 * @return A {@link HttpResponse} object represent 304 status.
+	 */
+	public static HttpResponse createCustom(String connection, int code, String text) {
+		HttpResponse response = new CustomHttpResponse(code, text);
 		
 		fillGeneralHeader(response, connection);
 		

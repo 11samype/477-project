@@ -21,8 +21,6 @@
  
 package server;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -49,13 +47,9 @@ public class ConnectionHandler implements Runnable {
 	public ConnectionHandler(Server server, Socket socket) {
 		this.server = server;
 		this.socket = socket;
-		try {
-			pluginHandler = new PluginHandler();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+
+		pluginHandler = new PluginHandler();
+
 	}
 	
 	/**
@@ -154,7 +148,7 @@ public class ConnectionHandler implements Runnable {
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
 			else {
-				pluginHandler.handle(request, outStream, server.getRootDirectory());
+				response = pluginHandler.handle(request, outStream, server.getRootDirectory());
 			}
 
 		}

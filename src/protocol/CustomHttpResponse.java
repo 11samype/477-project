@@ -29,7 +29,7 @@
 package protocol;
 
 /**
- * 
+ * For general use by plugins if desired response is not implemented
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
 public class CustomHttpResponse extends HttpResponse {

@@ -28,8 +28,6 @@
  
 package protocol;
 
-import java.io.File;
-
 /**
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)

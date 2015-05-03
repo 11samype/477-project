@@ -1,7 +1,4 @@
 package protocol;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 /*
  * HTTPResponse200OK.java

@@ -37,6 +37,6 @@ import protocol.HttpResponse;
  */
 public interface IRequestHandler {
 	
-	public HttpResponse doRequest(HttpRequest request, String rootDirectory);
+	public HttpResponse doRequest(HttpRequest request, String rootDirectory, String objectPath);
 	
 }

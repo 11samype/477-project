@@ -29,36 +29,21 @@
 package server;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.nio.file.StandardWatchEventKinds;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import protocol.HttpRequest;
-import protocol.HttpResponse404NotFound;
+import protocol.HttpResponse;
 import protocol.HttpResponseFactory;
-import protocol.HttpResponseSender;
 import protocol.Protocol;
 
 /**
@@ -73,97 +58,46 @@ public class PluginHandler {
 	 * @throws IOException
 	 * 
 	 */
-	public PluginHandler() throws IOException {
+	public PluginHandler() {
 		
-		WatchService watcher = FileSystems.getDefault().newWatchService();
-		Path dir = Paths.get("plugins");
-		dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE,
-				StandardWatchEventKinds.ENTRY_DELETE,
-				StandardWatchEventKinds.ENTRY_MODIFY);
-		while (true) {
-
-			WatchKey key;
-
-			try {
-
-				key = watcher.take();
-
-			} catch (InterruptedException ex) {
-				return;
-			}
-
-			for (WatchEvent<?> event : key.pollEvents()) {
-
-				WatchEvent.Kind<?> kind = event.kind();
-
-				WatchEvent<Path> ev = (WatchEvent<Path>) event;
-				Path filename = ev.context();
-
-				System.out.println(kind.name() + ": " + filename);
-
-				if (kind == StandardWatchEventKinds.OVERFLOW) {
-					continue;
-				} else if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
-					System.out.println("created");
-				
-					if (isDirectory(filename) && checkPlugin(filename)) {
-						plugins.add(filename.toString());
-						writeOverallConfig();
-					}
-					
-				} else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
-					System.out.println("deleted");
-					plugins.remove(filename);
-					writeOverallConfig();
-				} else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-					System.out.println("modified");
-					
-					if (isDirectory(filename) && !checkPlugin(filename)){
-						plugins.remove(filename.toString());
-						writeOverallConfig();
-					}
-				}
-				
-				
-
-			}
-
-			boolean valid = key.reset();
-			if (!valid) {
-				break;
-			}
-
-		}
+		
 	}
+	/**
+	 * 
+	 * Interprets Request and routes to proper plugin request handlers
+	 * 
+	 * @param request
+	 * @param outStream
+	 * @param rootDirectory
+	 * @return
+	 */
+	HttpResponse handle(HttpRequest request, OutputStream outStream, String rootDirectory) {
 
-	void handle(HttpRequest request, OutputStream outStream, String rootDirectory) {
-
+		// get URI, break into parts
 		String uri = request.getUri();
-
 		String uriParts[] = uri.split("/");
-
-		String pluginName = uriParts[0];
-
-		if (!plugins.contains(pluginName)) {
-			HttpResponseSender.sendResponse(
-					HttpResponseFactory.create404NotFound(Protocol.CLOSE),
-					null, outStream);
+		String pluginName = uriParts[1];
+		
+		// check if files exist
+		File pluginFile = new File("plugins/" + pluginName);
+		
+		if (!(pluginFile.exists() && pluginFile.isDirectory())) {
+			return HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 		}
 
 		File pluginConfigFile = new File("plugins/" + pluginName
 				+ "/config.txt");
-
+		// go line by line in config to see if request can be filled
 		try (BufferedReader br = new BufferedReader(new FileReader(
 				pluginConfigFile))) {
 			String line;
 			while ((line = br.readLine()) != null) {
-
-				String mapping[] = uri.split(" ");
-
+				String mapping[] = line.split(" ");
+				
 				if (request.getMethod().equals(mapping[0])) {
-					if (("/" + uriParts[1]).equals(mapping[1])) {
-						
-						File pluginJar = new File("plugins/" + pluginName + "/" + pluginName);
+					if (("/" + uriParts[2]).equals(mapping[1])) {
+
+						File pluginJar = new File("plugins/" + pluginName + "/" + pluginName + ".jar");
 						
 						URL[] urls = new URL[] { pluginJar.toURI().toURL() };
 						URLClassLoader loader = new URLClassLoader(urls);
@@ -188,58 +122,49 @@ public class PluginHandler {
 						
 						List<Class<?>> classList = findImplementingClassesInJarFile(pluginJar, iface, loader);
 						
-						if (classList.contains(mapping[2])) {
-							int index = classList.indexOf(mapping[2]);
+						ArrayList<String> classListStrings = new ArrayList<String>();
+						
+						for (Class<?> class1 : classList) {
+							classListStrings.add(pluginName + "." + class1.toString().split(" ")[1]);
+						}
+						
+						if (classListStrings.contains(mapping[2])) {
+							int index = classListStrings.indexOf(mapping[2]);
 							Class<?> pluginClass = classList.get(index);
 							
 							IRequestHandler plugin = (IRequestHandler) pluginClass.newInstance();
-							plugin.doRequest(request, rootDirectory);
-							return;
+							
+							rootDirectory = "plugins/"+pluginName;
+							
+							String objectPath = "";
+							
+							for (int i = 3; i < uriParts.length; i++) {
+								
+								objectPath += "/"+uriParts[i];
+							}
+							// proper request handler found in plugin, routing request to be handled
+							return plugin.doRequest(request, rootDirectory, objectPath);
+							
 						}
 					}
 				}
-
-				HttpResponseSender.sendResponse(
-						HttpResponseFactory.create404NotFound(Protocol.CLOSE),
-						null, outStream);
-
+				
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			System.out.println(e);
 		}
-
-	}
-
-	private void readOverallConfig() {
-		plugins.clear();
-		File configFile = new File("plugins/config.txt");
-
-		try (BufferedReader br = new BufferedReader(new FileReader(configFile))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				plugins.add(line);
-			}
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
+		return HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 
 	}
 	
-	private void writeOverallConfig() throws IOException {
-		File configFile = new File("plugins/config.txt");
-		
-		FileOutputStream fos = new FileOutputStream(configFile);
-		
-		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-		
-		for (int i = 0; i < plugins.size(); i++) {
-			bw.write(plugins.get(i));
-			bw.newLine();
-		}
-		
-		bw.close();
-	}
-
+	/**
+	 * Searches for classes that implement a specific interface in a jar file
+	 * @param file
+	 * @param iface
+	 * @param loader
+	 * @return
+	 * @throws Exception
+	 */
 	public static List<Class<?>> findImplementingClassesInJarFile(File file,
 			Class<?> iface, ClassLoader loader) throws Exception {
 		List<Class<?>> implementingClasses = new ArrayList<Class<?>>();
@@ -265,6 +190,13 @@ public class PluginHandler {
 		return implementingClasses;
 	}
 
+	/**
+	 * Finds all classes within a jar file
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 * @throws IllegalArgumentException
+	 */
 	public static List<String> scanJarFileForClasses(File file)
 			throws IOException, IllegalArgumentException {
 		if (file == null || !file.exists()) {
@@ -292,27 +224,6 @@ public class PluginHandler {
 			return foundClasses;
 		}
 		throw new IllegalArgumentException("No jar-file provided");
-	}
-
-	private boolean checkPlugin(Path filename){
-		
-		boolean hasConfig = new File(filename.toString() + "/config.txt").exists();
-		System.out.println(filename.toString() + "/config.txt");
-		boolean hasPlugin = new File(filename.toString() + "/" + filename.toString() + ".jar").exists();
-		System.out.println(filename.toString() + "/" + filename.toString() + ".jar");
-		
-		if (hasConfig && hasPlugin) {
-			return true;
-		}
-		return false;
-	}
-	
-	private boolean isDirectory(Path filename) {
-
-		boolean isDirectory = filename.toFile().isDirectory();
-		isDirectory = new File(filename.toString()).isDirectory();
-		System.out.println("Directory: " + isDirectory);
-		return isDirectory;
 	}
 }
 
