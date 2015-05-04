@@ -1,1 +1,0 @@
-GET /GetServlet HelloPlugin.GETRequestHandler

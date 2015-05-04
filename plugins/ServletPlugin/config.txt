@@ -1,4 +1,0 @@
-GET /GetServlet ServletPlugin.GETRequestHandler
-POST /PostServlet ServletPlugin.POSTRequestHandler
-PUT /PutServlet ServletPlugin.PUTRequestHandler
-DELETE /DeleteServlet ServletPlugin.DELETERequestHandler

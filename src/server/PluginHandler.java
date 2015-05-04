@@ -134,14 +134,15 @@ public class PluginHandler {
 							
 							IRequestHandler plugin = (IRequestHandler) pluginClass.newInstance();
 							
-							rootDirectory = "plugins/"+pluginName;
+							rootDirectory = "plugins/" + pluginName;
 							
 							String objectPath = "";
 							
 							for (int i = 3; i < uriParts.length; i++) {
 								
-								objectPath += "/"+uriParts[i];
+								objectPath += "/" + uriParts[i];
 							}
+							loader.close();
 							// proper request handler found in plugin, routing request to be handled
 							return plugin.doRequest(request, rootDirectory, objectPath);
 							
