@@ -23,9 +23,13 @@ package server;
 
 import gui.WebServer;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This represents a welcoming server for the incoming
@@ -42,6 +46,11 @@ public class Server implements Runnable {
 	private long connections;
 	private long serviceTime;
 	
+	ExecutorService executor;
+	
+	private Timer timer;
+	private StatusUpdater statusUpdater;
+	
 	private WebServer window;
 	/**
 	 * @param rootDirectory
@@ -54,6 +63,19 @@ public class Server implements Runnable {
 		this.connections = 0;
 		this.serviceTime = 0;
 		this.window = window;
+		
+		executor = Executors.newFixedThreadPool(100);
+		
+		this.timer = new Timer();
+		this.statusUpdater = new StatusUpdater("status.txt", executor);
+		this.timer.scheduleAtFixedRate(statusUpdater, 0, 5000);
+		
+	}
+	
+	public void stopTimer() {
+		
+		timer.cancel();
+		timer.purge();
 	}
 
 	/**
@@ -130,12 +152,15 @@ public class Server implements Runnable {
 				
 				// Create a handler for this incoming connection and start the handler in a new thread
 				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket);
-				new Thread(handler).start();
+//				new Thread(handler).start();
+				executor.execute(handler);
 			}
 			this.welcomeSocket.close();
 		}
 		catch(Exception e) {
 			window.showSocketException(e);
+
+			
 		}
 	}
 	
@@ -155,6 +180,8 @@ public class Server implements Runnable {
 			
 			// We do not have any other job for this socket so just close it
 			socket.close();
+			
+			stopTimer();
 		}
 		catch(Exception e){}
 	}

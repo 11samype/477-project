@@ -132,6 +132,7 @@ public class HttpResponse {
 	 * @throws Exception
 	 */
 	public void write(OutputStream outStream) throws Exception {
+
 		BufferedOutputStream out = new BufferedOutputStream(outStream, Protocol.CHUNK_LENGTH);
 
 		// First status line

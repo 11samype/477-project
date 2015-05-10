@@ -21,9 +21,16 @@
  
 package server;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import protocol.HttpRequest;
 import protocol.HttpResponse;
@@ -43,11 +50,22 @@ public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
 	private PluginHandler pluginHandler;
+	private String requestLog;
+	private String responseLog;
+	private Timer timer;
 	
 	public ConnectionHandler(Server server, Socket socket) {
 		this.server = server;
 		this.socket = socket;
+		System.out.println(socket.getInetAddress());
+		System.out.println(socket.getPort());
+		System.out.println(socket.getLocalAddress());
+		requestLog = "requestlog.txt";
+		responseLog = "responselog.txt";
 
+		this.timer = new Timer();
+//		this.timer.scheduleAtFixedRate(, 0, 5000);
+		
 		pluginHandler = new PluginHandler();
 
 	}
@@ -96,7 +114,8 @@ public class ConnectionHandler implements Runnable {
 		HttpResponse response = null;
 		try {
 			request = HttpRequest.read(inStream);
-			System.out.println(request);
+			
+//			System.out.println(request);
 		}
 		catch(ProtocolException pe) {
 			// We have some sort of protocol exception. Get its status code and create response
@@ -116,10 +135,12 @@ public class ConnectionHandler implements Runnable {
 			// For any other error, we will create bad request response as well
 			response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
 		}
+		writeLog(requestLog, "+");
 		
 		if(response != null) {
 			// Means there was an error, now write the response object to the socket
 			try {
+				
 				response.write(outStream);
 //				System.out.println(response);
 			}
@@ -127,6 +148,7 @@ public class ConnectionHandler implements Runnable {
 				// We will ignore this exception
 				e.printStackTrace();
 			}
+			writeLog(responseLog, "-");
 
 			// Increment number of connections by 1
 			server.incrementConnections(1);
@@ -174,11 +196,20 @@ public class ConnectionHandler implements Runnable {
 			// We will ignore this exception
 			e.printStackTrace();
 		} 
-		
+		writeLog(responseLog, "-");
 		// Increment number of connections by 1
 		server.incrementConnections(1);
 		// Get the end time
 		long end = System.currentTimeMillis();
 		this.server.incrementServiceTime(end-start);
 	}
+	
+	private void writeLog(String logFile, String toAppend) {
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)))) {
+			out.println(toAppend);
+		} catch (IOException e) {
+			System.err.println("IOException: " + e.getMessage());
+		}
+	}
+	
 }
