@@ -66,7 +66,9 @@ public class ConnectionHandler implements Runnable {
 
 		this.timer = new Timer();
 		this.timer.schedule(new TimeOut(socket), 1000);
-//		this.timer.scheduleAtFixedRate(, 0, 5000);
+		
+		responseLog = "responselog.txt";
+		requestLog = "requestlog.txt";
 		
 		pluginHandler = new PluginHandler();
 		this.fileHandler = fileHandler;
@@ -141,7 +143,8 @@ public class ConnectionHandler implements Runnable {
 		this.timer.cancel();
 		this.timer.purge();
 		
-		System.out.println("Req Push");
+//		writeLog(requestLog, "-");
+//		System.out.println("Req Push");
 		fileHandler.pushDataRequest(socket.getInetAddress().toString().substring(1));
 		
 		
@@ -156,7 +159,8 @@ public class ConnectionHandler implements Runnable {
 				// We will ignore this exception
 				e.printStackTrace();
 			}
-			System.out.println("Res Push");
+//			writeLog(responseLog, "-");
+//			System.out.println("Res Push");
 			fileHandler.pushDataResponse(socket.getInetAddress().toString().substring(1));
 
 			// Increment number of connections by 1
@@ -208,7 +212,8 @@ public class ConnectionHandler implements Runnable {
 			e.printStackTrace();
 		} 
 		
-		System.out.println("Res Push");
+//		writeLog(responseLog, "-");
+//		System.out.println("Res Push");
 		fileHandler.pushDataResponse(socket.getInetAddress().toString().substring(1));
 		// Increment number of connections by 1
 		server.incrementConnections(1);
@@ -217,4 +222,11 @@ public class ConnectionHandler implements Runnable {
 		this.server.incrementServiceTime(end-start);
 	}
 	
+	private void writeLog(String logFile, String toAppend) {
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)))) {
+			out.println(toAppend);
+		} catch (IOException e) {
+			System.err.println("IOException: " + e.getMessage());
+		}
+	}
 }

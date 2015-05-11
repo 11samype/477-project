@@ -192,6 +192,9 @@ public class Server implements Runnable {
 					break;
 				
 				this.blockedUsers = this.fileHandler.getBlockedUsers();
+				for (InetAddress inetAddress : blockedUsers) {
+					System.out.println(">" + inetAddress);
+				}
 				
 				if (!this.blockedUsers.contains(connectionSocket.getInetAddress())) {
 					// Create a handler for this incoming connection and start the handler in a new thread
@@ -200,7 +203,7 @@ public class Server implements Runnable {
 					executor.execute(handler);
 				
 				} else {
-					
+//					System.out.println("BLOCKED");
 					connectionSocket.close();
 				}
 			}

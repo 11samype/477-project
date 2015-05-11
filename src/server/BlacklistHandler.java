@@ -51,8 +51,18 @@ public class BlacklistHandler extends TimerTask {
 	
 	private ArrayList<InetAddress> blockedUsers = new ArrayList<InetAddress>();
 	
+	/**
+	 * 
+	 */
+	public BlacklistHandler() {
+		this.blockedUsers = new ArrayList<InetAddress>();
+	}
+	
 	public void setBlockedUsers(ArrayList<InetAddress> blocked){
 		this.blockedUsers = blocked;
+//		for (InetAddress inetAddress : blocked) {
+//			System.out.println(inetAddress);
+//		}
 	}
 	
 	public ArrayList<InetAddress> getBlockedUsers(){
@@ -104,7 +114,9 @@ public class BlacklistHandler extends TimerTask {
 			if (requests.get(request) > 100){
 				try (PrintWriter out = new PrintWriter(new BufferedWriter(
 						new FileWriter("blacklist.txt", true)))) {
-					out.println(request);
+					
+//					System.out.println(request.toString());
+					out.println(request.toString().substring(1));
 					this.blockedUsers.add(request);
 				} catch (IOException e) {
 					System.err.println("IOException: " + e.getMessage());

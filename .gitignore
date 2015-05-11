@@ -39,3 +39,5 @@ bin
 /requestlog.txt
 /responselog.txt
 /status.txt
+/watchLog.txt
+/blacklist.txt
