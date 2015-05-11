@@ -23,13 +23,21 @@ package server;
 
 import gui.WebServer;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import protocol.HttpResponseFactory;
+import protocol.Protocol;
 
 /**
  * This represents a welcoming server for the incoming
@@ -48,6 +56,8 @@ public class Server implements Runnable {
 	
 	ExecutorService executor;
 	
+	ArrayList<InetAddress> blockedUsers;
+	
 	private Timer timer;
 	private StatusUpdater statusUpdater;
 	
@@ -64,7 +74,11 @@ public class Server implements Runnable {
 		this.serviceTime = 0;
 		this.window = window;
 		
-		executor = Executors.newFixedThreadPool(100);
+		this.blockedUsers = new ArrayList<InetAddress>();
+		
+		populateBlockedUsers();
+		
+		executor = Executors.newFixedThreadPool(10);
 		
 		this.timer = new Timer();
 		this.statusUpdater = new StatusUpdater("status.txt", executor);
@@ -72,6 +86,25 @@ public class Server implements Runnable {
 		
 	}
 	
+	/**
+	 * 
+	 */
+	private void populateBlockedUsers() {
+		File blockedFile = new File("blacklist.txt");
+
+		// go line by line in config to see if request can be filled
+		try (BufferedReader br = new BufferedReader(new FileReader(
+				blockedFile))) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				blockedUsers.add(InetAddress.getByName(line));
+			}
+		} catch (Exception e) {
+			
+		}
+		
+	}
+
 	public void stopTimer() {
 		
 		timer.cancel();
@@ -150,10 +183,16 @@ public class Server implements Runnable {
 				if(this.stop)
 					break;
 				
-				// Create a handler for this incoming connection and start the handler in a new thread
-				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket);
-//				new Thread(handler).start();
-				executor.execute(handler);
+				if (!this.blockedUsers.contains(connectionSocket.getInetAddress())) {
+					// Create a handler for this incoming connection and start the handler in a new thread
+					ConnectionHandler handler = new ConnectionHandler(this, connectionSocket);
+	//				new Thread(handler).start();
+					executor.execute(handler);
+				
+				} else {
+					
+					connectionSocket.close();
+				}
 			}
 			this.welcomeSocket.close();
 		}

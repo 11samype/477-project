@@ -57,9 +57,6 @@ public class ConnectionHandler implements Runnable {
 	public ConnectionHandler(Server server, Socket socket) {
 		this.server = server;
 		this.socket = socket;
-		System.out.println(socket.getInetAddress());
-		System.out.println(socket.getPort());
-		System.out.println(socket.getLocalAddress());
 		requestLog = "requestlog.txt";
 		responseLog = "responselog.txt";
 
@@ -135,7 +132,7 @@ public class ConnectionHandler implements Runnable {
 			// For any other error, we will create bad request response as well
 			response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
 		}
-		writeLog(requestLog, "+");
+		writeLog(requestLog, socket.getInetAddress().toString().substring(1));
 		
 		if(response != null) {
 			// Means there was an error, now write the response object to the socket
@@ -148,7 +145,7 @@ public class ConnectionHandler implements Runnable {
 				// We will ignore this exception
 				e.printStackTrace();
 			}
-			writeLog(responseLog, "-");
+			writeLog(responseLog, socket.getInetAddress().toString().substring(1));
 
 			// Increment number of connections by 1
 			server.incrementConnections(1);
@@ -196,7 +193,7 @@ public class ConnectionHandler implements Runnable {
 			// We will ignore this exception
 			e.printStackTrace();
 		} 
-		writeLog(responseLog, "-");
+		writeLog(responseLog, socket.getInetAddress().toString().substring(1));
 		// Increment number of connections by 1
 		server.incrementConnections(1);
 		// Get the end time

@@ -36,3 +36,6 @@ local.properties
 .texlipse
 plugins
 bin
+/requestlog.txt
+/responselog.txt
+/status.txt

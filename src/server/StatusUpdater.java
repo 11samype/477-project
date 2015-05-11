@@ -71,6 +71,27 @@ public class StatusUpdater extends TimerTask {
 					e.printStackTrace();
 				}
 				
+				try {
+					writer = new PrintWriter(new File("requestlog.txt"));
+					writer.print("");
+					writer.close();
+				
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+				try {
+					writer = new PrintWriter(new File("responselog.txt"));
+					writer.print("");
+					writer.close();
+				
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		});
 
