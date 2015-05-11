@@ -23,12 +23,17 @@ package server;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.net.Socket;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -53,17 +58,18 @@ public class ConnectionHandler implements Runnable {
 	private String requestLog;
 	private String responseLog;
 	private Timer timer;
+	private BlacklistHandler fileHandler;
 	
-	public ConnectionHandler(Server server, Socket socket) {
+	public ConnectionHandler(Server server, Socket socket, BlacklistHandler fileHandler) {
 		this.server = server;
 		this.socket = socket;
-		requestLog = "requestlog.txt";
-		responseLog = "responselog.txt";
 
 		this.timer = new Timer();
+		this.timer.schedule(new TimeOut(socket), 1000);
 //		this.timer.scheduleAtFixedRate(, 0, 5000);
 		
 		pluginHandler = new PluginHandler();
+		this.fileHandler = fileHandler;
 
 	}
 	
@@ -132,7 +138,12 @@ public class ConnectionHandler implements Runnable {
 			// For any other error, we will create bad request response as well
 			response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
 		}
-		writeLog(requestLog, socket.getInetAddress().toString().substring(1));
+		this.timer.cancel();
+		this.timer.purge();
+		
+		System.out.println("Req Push");
+		fileHandler.pushDataRequest(socket.getInetAddress().toString().substring(1));
+		
 		
 		if(response != null) {
 			// Means there was an error, now write the response object to the socket
@@ -145,7 +156,8 @@ public class ConnectionHandler implements Runnable {
 				// We will ignore this exception
 				e.printStackTrace();
 			}
-			writeLog(responseLog, socket.getInetAddress().toString().substring(1));
+			System.out.println("Res Push");
+			fileHandler.pushDataResponse(socket.getInetAddress().toString().substring(1));
 
 			// Increment number of connections by 1
 			server.incrementConnections(1);
@@ -167,7 +179,9 @@ public class ConnectionHandler implements Runnable {
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
 			else {
-				response = pluginHandler.handle(request, outStream, server.getRootDirectory());
+				Timer timer = new Timer();
+				timer.schedule(new TimeOut(socket), 1000);
+				response = pluginHandler.handle(request, timer, outStream, server.getRootDirectory());
 			}
 
 		}
@@ -193,20 +207,14 @@ public class ConnectionHandler implements Runnable {
 			// We will ignore this exception
 			e.printStackTrace();
 		} 
-		writeLog(responseLog, socket.getInetAddress().toString().substring(1));
+		
+		System.out.println("Res Push");
+		fileHandler.pushDataResponse(socket.getInetAddress().toString().substring(1));
 		// Increment number of connections by 1
 		server.incrementConnections(1);
 		// Get the end time
 		long end = System.currentTimeMillis();
 		this.server.incrementServiceTime(end-start);
-	}
-	
-	private void writeLog(String logFile, String toAppend) {
-		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)))) {
-			out.println(toAppend);
-		} catch (IOException e) {
-			System.err.println("IOException: " + e.getMessage());
-		}
 	}
 	
 }

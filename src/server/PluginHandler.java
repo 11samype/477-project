@@ -38,6 +38,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Timer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -71,7 +72,7 @@ public class PluginHandler {
 	 * @param rootDirectory
 	 * @return
 	 */
-	HttpResponse handle(HttpRequest request, OutputStream outStream, String rootDirectory) {
+	HttpResponse handle(HttpRequest request, Timer timer, OutputStream outStream, String rootDirectory) {
 
 		// get URI, break into parts
 		String uri = request.getUri();
@@ -144,7 +145,11 @@ public class PluginHandler {
 							}
 							loader.close();
 							// proper request handler found in plugin, routing request to be handled
-							return plugin.doRequest(request, rootDirectory, objectPath);
+							
+							HttpResponse response = plugin.doRequest(request, rootDirectory, objectPath);
+							timer.cancel();
+							timer.purge();
+							return response;
 							
 						}
 					}

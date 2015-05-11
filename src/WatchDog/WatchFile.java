@@ -44,8 +44,6 @@ public class WatchFile extends TimerTask {
 
 			webServerProcess.destroy();
 
-			blockAttacker();
-
 			Runtime rt = Runtime.getRuntime();
 			try {
 				webServerProcess = rt.exec("java -jar WebServer.jar");
@@ -60,44 +58,6 @@ public class WatchFile extends TimerTask {
 
 	}
 
-	/**
-	 * 
-	 */
-	private void blockAttacker() {
-
-		requesters.clear();
-		File blockedFile = new File("requestlog.txt");
-
-		// go line by line in config to see if request can be filled
-		try (BufferedReader br = new BufferedReader(new FileReader(blockedFile))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				InetAddress requester = InetAddress
-						.getByName(line.substring(1));
-
-				Integer requests = requesters.get(requester);
-				
-				if (requests == null) {
-					requests = 0;
-				}
-				requests++;
-				
-				requesters.put(requester, requests);
-				
-			}
-			
-			Set<InetAddress> addressSet = requesters.keySet();
-			for (InetAddress address : addressSet) {
-				if (requesters.get(address) > 100) {
-					
-				}
-			}
-			
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-
-	}
 
 	private void writeLog(String logFile, String toAppend) {
 		try (PrintWriter out = new PrintWriter(new BufferedWriter(

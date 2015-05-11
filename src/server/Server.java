@@ -57,6 +57,7 @@ public class Server implements Runnable {
 	ExecutorService executor;
 	
 	ArrayList<InetAddress> blockedUsers;
+	private BlacklistHandler fileHandler;
 	
 	private Timer timer;
 	private StatusUpdater statusUpdater;
@@ -80,8 +81,15 @@ public class Server implements Runnable {
 		
 		executor = Executors.newFixedThreadPool(10);
 		
+		
 		this.timer = new Timer();
-		this.statusUpdater = new StatusUpdater("status.txt", executor);
+
+		
+		this.fileHandler = new BlacklistHandler();
+		this.fileHandler.setBlockedUsers(blockedUsers);
+		this.timer.scheduleAtFixedRate(fileHandler, 0, 2000);
+		
+		this.statusUpdater = new StatusUpdater("status.txt", executor, fileHandler);
 		this.timer.scheduleAtFixedRate(statusUpdater, 0, 5000);
 		
 	}
@@ -183,9 +191,11 @@ public class Server implements Runnable {
 				if(this.stop)
 					break;
 				
+				this.blockedUsers = this.fileHandler.getBlockedUsers();
+				
 				if (!this.blockedUsers.contains(connectionSocket.getInetAddress())) {
 					// Create a handler for this incoming connection and start the handler in a new thread
-					ConnectionHandler handler = new ConnectionHandler(this, connectionSocket);
+					ConnectionHandler handler = new ConnectionHandler(this, connectionSocket, fileHandler);
 	//				new Thread(handler).start();
 					executor.execute(handler);
 				

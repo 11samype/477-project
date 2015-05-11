@@ -1,6 +1,6 @@
 /*
- * StatusUpdater.java
- * May 7, 2015
+ * TimeOut.java
+ * May 10, 2015
  *
  * Simple Web Server (SWS) for EE407/507 and CS455/555
  * 
@@ -28,55 +28,49 @@
  
 package server;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
-import java.util.Date;
+import java.net.Socket;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
+
+import protocol.HttpResponse;
+import protocol.HttpResponseFactory;
+import protocol.Protocol;
 
 /**
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class StatusUpdater extends TimerTask {
+public class TimeOut extends TimerTask {
 
-	private File file;
-	private ExecutorService executor;
-	private BlacklistHandler fileHandler;
-	
-	public StatusUpdater(String fileName, ExecutorService executor, BlacklistHandler fileHandler) {
-		this.file = new File(fileName);
-		this.executor = executor;
-		this.fileHandler = fileHandler;
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.util.TimerTask#run()
 	 */
+	Socket socket;
+	
+	public TimeOut(Socket socket){
+		this.socket = socket;
+	}
+	
 	@Override
 	public void run() {
-//		System.out.println("RUN");
+//		HttpResponse timedOut = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+//		try {
+//			timedOut.write(socket.getOutputStream());
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
-		PrintWriter writer;
 		try {
-			Date current = new Date();
-			writer = new PrintWriter(file);
-			writer.println(current.getTime());
-			writer.close();
-		} catch (FileNotFoundException e) {
+			this.socket.close();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		this.fileHandler.resetFiles();
-
-
 	}
 
 }
