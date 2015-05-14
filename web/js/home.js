@@ -79,7 +79,7 @@ var ajaxFillAmiiboList = function() {
 		type: 'GET',
 		contentType:"application/json",
 		dataType:"json",
-		success: function(data){setTimeout(fillAmiibos,800,data)}
+		success: function(data){setTimeout(fillAmiibos,1100,data)}
 	});
 }
 
@@ -89,7 +89,7 @@ var ajaxGetAmiiboTotal = function() {
 		type: 'GET',
 		contentType:"application/json",
 		dataType:"json",
-		success: function(data){setTimeout(fillTotal,800,data)}
+		success: function(data){setTimeout(fillTotal,1100,data)}
 	});
 }
 
@@ -107,7 +107,7 @@ var ajaxNewAmiibo = function() {
 			ownership: ownership,
 			price: price
 		}),
-		success: function(){setTimeout(newAmiiboCallback,800)},
+		success: function(){setTimeout(newAmiiboCallback,1100)},
 		error: function(error){console.log(error)}
 	});
 }
@@ -132,7 +132,7 @@ var ajaxEditAmiibo = function() {
 			ownership: ownership,
 			price: price
 		}),
-		success: function(){setTimeout(editAmiiboCallback,800)},
+		success: function(){setTimeout(editAmiiboCallback,1100)},
 		error: function(error){console.log(error)}
 	});
 }
