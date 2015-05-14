@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Amiibo Listing</title>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/home.js"></script>
+<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css" />
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="css/home.css" />
+</head>
+
+<body>
+
+<!-- Modal -->
+<div class="modal fade" id="newAmiiboModal" tabindex="-1" role="dialog" aria-labelledby="newAmiiboModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="newAmiiboModalLabel">New Amiibo Information</h4>
+      </div>
+      <div class="modal-body">
+      		<input id="newAmiiboName" type="text" class="form-control" placeholder="Amiibo Name"/>
+            <select id="newAmiiboOwnership" class="form-control" placeholder="Ownership">
+            	<option value="NONE">NONE</option>
+                <option value="OWN">OWN</option>
+            </select>
+            <input id="newAmiiboPrice" type="number" class="form-control" placeholder="Price"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" id="submitNewAmiibo" class="btn btn-primary">Add Amiibo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="editAmiiboModal" tabindex="-1" role="dialog" aria-labelledby="editAmiiboModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="newAmiiboModalLabel">Edit Amiibo Information</h4>
+      </div>
+      <div class="modal-body">
+      		<input id="editAmiiboName" type="text" class="form-control" placeholder="Amiibo Name"/>
+            <select id="editAmiiboOwnership" class="form-control" placeholder="Ownership">
+            	<option value="NONE">NONE</option>
+                <option value="OWN">OWN</option>
+            </select>
+            <input id="editAmiiboPrice" type="number" class="form-control" placeholder="Price"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" id="submitEditAmiibo" class="btn btn-primary">Update Amiibo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteAmiiboModal" tabindex="-1" role="dialog" aria-labelledby="deleteAmiiboModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="deleteGameModalLabel">Permanent Change</h4>
+      </div>
+      <div class="modal-body">
+      		You cannot undo this action once it has been completed.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" id="submitDeleteAmiibo" class="btn btn-primary">Remove Amiibo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="showTotalModal" tabindex="-1" role="dialog" aria-labelledby="showTotalModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="newAmiiboModalLabel">Amiibo Summary</h4>
+      </div>
+      <div class="modal-body">
+      		<label id="totalAmiiboLabel" value="Total Amiibos: ">Total Amiibos:</label>
+            <label id="totalAmiiboCount" value="Total Amiibos: ">0</label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table">
+    <div class="table-cell">
+      <div class="form-container">
+        <div class="content container">
+          <div class="row">
+            <div class="col-md-offset-2 col-md-8 body">
+            	<div class="row">
+                    <div class="col-md-12">
+                        <h4>My Amiibos</h4>
+                        <div class="title-cell">
+                           <div>Amiibo Name</div>
+                           <div>Ownership</div>
+                           <div>Price ($)</div>
+                           <div></div>
+                        </div>
+                        <div class="fill-amiibos" size="10" multiple="multiple">
+                        </div>
+                        
+                    </div>
+            	</div>
+                <div class="row spaced">
+                	<div class="col-md-6">
+                    	<button type="button" id="newAmiibo" class="btn btn-lg btn-primary btn-block" data-toggle="modal" data-target="#newAmiiboModal">Add New Amiibo</button>
+                    </div>
+                    <div class="col-md-6">
+                    	<button type="button" id="getTotal" class="btn btn-lg btn-primary btn-block" data-toggle="modal" data-target="#showTotalModal">Check Total</button>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+
