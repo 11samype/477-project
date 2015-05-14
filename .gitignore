@@ -34,7 +34,6 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
-plugins
 bin
 /requestlog.txt
 /responselog.txt

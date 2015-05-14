@@ -1,0 +1,4 @@
+GET /GetServlet HelloPlugin.GETRequestHandler
+POST /PostServlet HelloPlugin.POSTRequestHandler
+PUT /PutServlet HelloPlugin.PUTRequestHandler
+DELETE /DeleteServlet HelloPlugin.DELETERequestHandler

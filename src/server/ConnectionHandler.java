@@ -55,8 +55,8 @@ public class ConnectionHandler implements Runnable {
 	private Server server;
 	private Socket socket;
 	private PluginHandler pluginHandler;
-	private String requestLog;
-	private String responseLog;
+//	private String requestLog;
+//	private String responseLog;
 	private Timer timer;
 	private BlacklistHandler fileHandler;
 	
@@ -67,9 +67,9 @@ public class ConnectionHandler implements Runnable {
 		this.timer = new Timer();
 		this.timer.schedule(new TimeOut(socket), 1000);
 		
-		responseLog = "responselog.txt";
-		requestLog = "requestlog.txt";
-		
+//		responseLog = "responselog.txt";
+//		requestLog = "requestlog.txt";
+//		
 		pluginHandler = new PluginHandler();
 		this.fileHandler = fileHandler;
 

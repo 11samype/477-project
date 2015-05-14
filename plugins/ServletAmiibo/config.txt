@@ -1,0 +1,5 @@
+GET /GetServlet ServletAmiibo.GETRequestHandler
+GET /GetServletTotal ServletAmiibo.TotalGETRequestHandler
+POST /PostServlet ServletAmiibo.POSTRequestHandler
+PUT /PutServlet ServletAmiibo.PUTRequestHandler
+DELETE /DeleteServlet ServletAmiibo.DELETERequestHandler
